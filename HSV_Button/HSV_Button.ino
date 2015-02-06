@@ -307,5 +307,5 @@ void pisca(int d) {
   delay(d);
 }
 
-void teste()
+void teste2()
 
