@@ -99,34 +99,33 @@ void loop() {
   readBut();
   if (estado != estadoAnterior) atualizaEstado();
 
-  if (Serial.available() > 0) {
-    // get incoming byte:
 
-  }
   if (Sensor) {
     sensorReading = analogRead(entrada);
     media = (sensorReading - threshold + media) / 2;
     if ((sensorReading >= threshold)) {
       Serial.println(sensorReading - threshold); //Will send only positive and absolute values of waveform
-      hue = 5 * (sensorReading - threshold) * HUE_DELTA + hue + HUE_DELTA;
+      hue =  3 * (sensorReading - threshold) * HUE_DELTA + hue + HUE_DELTA;
       value = 1.0; saturation =  1.0;
 
     }
   } else  {
     digitalWrite(13, LOW);
-    value = 0.2; saturation = 1.0;
-  } hue += HUE_DELTA;
+    value = 0.5; saturation = 1.0;
+    hue += HUE_DELTA;
+  } 
 
   if (hue > HUE_MAX) {
     hue = 0.0;
   }
-  if (media > 2 * MEDIA_MAX) {
+  if (media > 1.5 * MEDIA_MAX) {
     callib();
-
   }
+  atualizaLEDS(hue, saturation, value);
+  //faz o fade de intensidade para ter variação na luz
   value -= 0.005;
-  if (value > 0.2) {
-    value = 0.2;
+  if (value < 0.4) {
+    value = 0.4;
   }
   atualizaLEDS(hue, saturation, value);
 
@@ -185,18 +184,17 @@ long HSV_to_RGB( float h, float s, float v ) {
 
 
 void callib() {
+  sensorMax = 0;
   digitalWrite(13, HIGH);
   while (millis() < 3000) {
     threshold = analogRead(entrada);
 
-    // record the maximum sensor value
     if (threshold > sensorMax) {
       sensorMax = threshold;
     }
 
   }
 
-  // signal the end of the calibration period
   digitalWrite(13, LOW);
   threshold = sensorMax - MEDIA_MAX;
   Serial.println("     ________________________________");
@@ -226,10 +224,10 @@ void readBut() {
         atualizaEstado();
 
       }
-//      if ((millis() - lastDebounceTime) > 100 * debounceDelay) {
-//        estado = 52;
-//        atualizaEstado();
-     // }
+      //      if ((millis() - lastDebounceTime) > 100 * debounceDelay) {
+      //        estado = 52;
+      //        atualizaEstado();
+      // }
 
 
     }
@@ -263,17 +261,17 @@ void atualizaEstado() {
 
     case 48:
       Sensor = false;
-      Serial.println(Sensor ? "Modo Sensivel" : "Modo Rotacao");
+      //Serial.println(Sensor ? "Modo Sensivel" : "Modo Rotacao");
       break;
 
     case 49:
       input = true;
       entrada = input ? 0 : 1;
-      Serial.println(input ? "Sensor Mic" : "Entrada audio");
+      //Serial.println(input ? "Sensor Mic" : "Entrada audio");
       Sensor = true;
-      Serial.println(Sensor ? "Modo Sensivel" : "Modo Rotacao");
+      // Serial.println(Sensor ? "Modo Sensivel" : "Modo Rotacao");
       break;
-      
+
     case 50:
       input = false;
       entrada = input ? 0 : 1;
@@ -297,7 +295,6 @@ void atualizaEstado() {
       estadoAnterior = 47;
       break;
   }
-  delay(1000);
 }
 
 void pisca(int d) {
@@ -307,5 +304,5 @@ void pisca(int d) {
   delay(d);
 }
 
-void teste2()
+
 
